@@ -11,6 +11,7 @@ import org.scalatest.wordspec.AnyWordSpec
 
 class VideoSpec extends AnyWordSpec with Matchers {
   "VideoUtil" should {
+//    val trailer480p = new File("content/video/big_buck_bunny.mp4")
     val trailer480p = new File("content/video/trailer_480p.mov")
 
     "gather the correct information for trailer_480p.mov" in {
