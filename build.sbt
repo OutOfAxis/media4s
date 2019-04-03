@@ -1,8 +1,14 @@
 name := "media4s"
+<<<<<<< HEAD
 organization := "org.matthicks"
 version := "1.0.14"
 scalaVersion := "2.13.0"
 crossScalaVersions := List("2.13.0", "2.12.8", "2.11.12")
+=======
+version := "1.0.12"
+scalaVersion := "2.12.3"
+crossScalaVersions := List("2.12.3", "2.11.11")
+>>>>>>> remove donotype
 fork := true
 scalacOptions ++= Seq(
     "-deprecation",
