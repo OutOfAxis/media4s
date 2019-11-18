@@ -2,6 +2,11 @@ package org.matthicks.media4s.video.info
 
 import profig.JsonUtil
 
+import io.circe.Json
+import cats.syntax.either._
+import io.circe._, io.circe.parser._
+
+
 /**
  * @author Matt Hicks <matt@outr.com>
  */
@@ -35,21 +40,30 @@ case class MediaInfo(streams: List[MediaStream], format: MediaFormat) {
     }
   }
   def video: VideoInfo = videos.head
-  def audio: AudioInfo = audios.head
+//  def audio: AudioInfo = audios.head
   def frames: Int = videos.headOption.map(_.fps * duration).map(_.toInt).getOrElse(0)
 
   def hasVideo: Boolean = videos.nonEmpty
   def hasAudio: Boolean = audios.nonEmpty
 
   override def toString: String = {
-    s"MediaInfo(duration: $duration, start: $start, video: $video, audio: $audio, frames: $frames)"
+    s"MediaInfo(duration: $duration, start: $start, video: $video, audio: audio, frames: $frames)"
   }
 }
 
 object MediaInfo {
   def apply(jsonString: String): MediaInfo = try {
-    JsonUtil.fromJsonString[MediaInfo](jsonString)
+    val jsn = parse(jsonString).map( _.hcursor.downField("streams").withFocus(codecTypeFilter).top.get)
+    val j = jsn.getOrElse("{}").toString
+    JsonUtil.fromJsonString[MediaInfo](j)
   } catch {
     case t: Throwable => throw new RuntimeException(s"Failed to parse: $jsonString", t)
   }
-}
+
+
+
+
+  def codecTypeFilter(j:Json): Json = j.withArray { x =>
+    Json.fromValues(x.filter(_.hcursor.downField("codec_type").as[String].map(t => t != "data").getOrElse(false)))
+  }
+  }
