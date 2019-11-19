@@ -40,19 +40,20 @@ case class MediaInfo(streams: List[MediaStream], format: MediaFormat) {
     }
   }
   def video: VideoInfo = videos.head
-//  def audio: AudioInfo = audios.head
+  def audio: AudioInfo = audios.head
   def frames: Int = videos.headOption.map(_.fps * duration).map(_.toInt).getOrElse(0)
 
   def hasVideo: Boolean = videos.nonEmpty
   def hasAudio: Boolean = audios.nonEmpty
 
   override def toString: String = {
-    s"MediaInfo(duration: $duration, start: $start, video: $video, audio: audio, frames: $frames)"
+    s"MediaInfo(duration: $duration, start: $start, video: $video, audio: $audio, frames: $frames)"
   }
 }
 
 object MediaInfo {
   def apply(jsonString: String): MediaInfo = try {
+    //filter anything out other than video and audio codec_type
     val jsn = parse(jsonString).map( _.hcursor.downField("streams").withFocus(codecTypeFilter).top.get)
     val j = jsn.getOrElse("{}").toString
     JsonUtil.fromJsonString[MediaInfo](j)
@@ -64,6 +65,6 @@ object MediaInfo {
 
 
   def codecTypeFilter(j:Json): Json = j.withArray { x =>
-    Json.fromValues(x.filter(_.hcursor.downField("codec_type").as[String].map(t => t != "data").getOrElse(false)))
+    Json.fromValues(x.filter(_.hcursor.downField("codec_type").as[String].map(t => (t == "video" & t == "audio") ).getOrElse(false)))
   }
   }
